@@ -5,6 +5,7 @@ Auteurs : Gabriel C. Ullmann, Fabio Petrillo, 2025
 """
 import numbers
 import requests
+from flask import jsonify
 from logger import Logger
 from commands.write_payment import create_payment, update_status_to_paid
 from queries.read_payment import get_payment_by_id
@@ -41,8 +42,7 @@ def process_payment(payment_id, credit_card_data):
         "payment_id": update_result["payment_id"],
         "is_paid": update_result["is_paid"]
     }
-    # TODO: appelez la méthode correctement
-    update_order(0, False)
+    update_order(update_result["order_id"], update_result["is_paid"])
 
     return result
     
@@ -54,4 +54,14 @@ def _process_credit_card_payment(payment_data):
 
 def update_order(order_id, is_paid):
     """ Trigger order update once it is paid"""
-    pass
+    logger.debug("update_order called with order_id=%s, is_paid=%s", order_id, is_paid)
+    # Call Store Manager API to update order
+    store_manager_url = "http://store_manager:5000/orders"  
+    payload = {"order_id": order_id, "is_paid": is_paid}
+    try:
+        response = requests.put(store_manager_url, json=payload)
+        logger.debug(f"Store Manager API response: {response.status_code}, {response.text}")
+        return response.json()
+    except Exception as e:
+        logger.error(f"Failed to update order in Store Manager: {e}")
+        return jsonify({"error": str(e)}), 500
