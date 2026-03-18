@@ -6,3 +6,8 @@ mysql-connector-python>=8.0
 pymysql>=1.1
 cryptography>=45.0
 requests>=2.32
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-exporter-otlp-proto-grpc
+opentelemetry-instrumentation-flask
+opentelemetry-instrumentation-requests

@@ -52,16 +52,32 @@ def _process_credit_card_payment(payment_data):
     logger.debug(payment_data.get('cardCode'))
     logger.debug(payment_data.get('expirationDate'))
 
+# def update_order(order_id, is_paid):
+#     """ Trigger order update once it is paid"""
+#     logger.debug("update_order called with order_id=%s, is_paid=%s", order_id, is_paid)
+#     # Call Store Manager API to update order
+#     store_manager_url = "http://store_manager:5000/orders"  
+#     payload = {"order_id": order_id, "is_paid": is_paid}
+#     try:
+#         response = requests.put(store_manager_url, json=payload)
+#         logger.debug(f"Store Manager API response: {response.status_code}, {response.text}")
+#         return response.json()
+#     except Exception as e:
+#         logger.error(f"Failed to update order in Store Manager: {e}")
+#         return jsonify({"error": str(e)}), 500
 def update_order(order_id, is_paid):
-    """ Trigger order update once it is paid"""
-    logger.debug("update_order called with order_id=%s, is_paid=%s", order_id, is_paid)
-    # Call Store Manager API to update order
-    store_manager_url = "http://store_manager:5000/orders"  
-    payload = {"order_id": order_id, "is_paid": is_paid}
-    try:
-        response = requests.put(store_manager_url, json=payload)
-        logger.debug(f"Store Manager API response: {response.status_code}, {response.text}")
-        return response.json()
-    except Exception as e:
-        logger.error(f"Failed to update order in Store Manager: {e}")
-        return jsonify({"error": str(e)}), 500
+    """ Update order """
+    response_from_store_manager = requests.put(
+        'http://api-gateway:8080/store-manager-api/orders',
+        json={
+            'order_id': order_id,
+            'is_paid': is_paid,
+        },
+        headers={'Content-Type': 'application/json'}
+    )
+
+    if response_from_store_manager.ok:
+        data = response_from_store_manager.json() 
+        logger.info(data)
+    else:
+        logger.error("Erreur:", response_from_store_manager.status_code, response_from_store_manager.text)
